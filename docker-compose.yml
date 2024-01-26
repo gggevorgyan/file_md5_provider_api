@@ -1,0 +1,71 @@
+version: '3.8'
+
+services:
+
+  web:
+    build:
+      context: ./project/
+      dockerfile: ./web/Dockerfile
+    ports:
+      - 8000:8000
+    command: uvicorn main:app --host 0.0.0.0 --reload
+    volumes:
+      - ./project:/usr/src/project
+      - shared-data:/tmp/appdata
+    environment:
+      - PYTHONPATH=$${PYTHONPATH}:/usr/src/project
+      - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq_server:5672
+      - CELERY_RESULT_BACKEND=db+postgresql://username:secret@db:5432/database
+      - POSTGRES_PASSWORD=secret
+      - POSTGRES_USER=username
+      - POSTGRES_DB=database
+    depends_on:
+      - rabbitmq_server
+      - db
+
+  worker:
+    build:
+      context: ./project/
+      dockerfile: ./app/Dockerfile
+    command: celery -A worker.celery worker --loglevel=info
+    volumes:
+      - ./project:/usr/src/project
+      - shared-data:/tmp/appdata
+      - ./logs/:/var/log
+    environment:
+      - PYTHONPATH=$${PYTHONPATH}:/usr/src/project
+      - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq_server:5672
+      - CELERY_RESULT_BACKEND=db+postgresql://username:secret@db:5432/database
+      - POSTGRES_PASSWORD=secret
+      - POSTGRES_USER=username
+      - POSTGRES_DB=database
+      - LOGLEVEL=INFO
+    deploy:
+      replicas: 1
+    depends_on:
+      - web
+      - rabbitmq_server
+      - db
+
+  rabbitmq_server:
+    image: rabbitmq:3-management
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    ports:
+      - 5672:5672
+      - 15672:15672
+
+  db:
+    image: postgres:latest
+    ports:
+      - 5432:5432
+    volumes:
+      - ./project/database/postgres/data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=secret
+      - POSTGRES_USER=username
+      - POSTGRES_DB=database
+
+volumes:
+  shared-data:

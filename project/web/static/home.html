@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>- MD5 -</title>
+</head>
+<body>
+    <h2> MD5 </h2>
+    <form action="http://127.0.0.1:8000/upload" method="POST" enctype="multipart/form-data" target="upload_fame">
+        <!-- File input field -->
+        <label for="file">Choose file to make MD5 :</label>
+        <input type="file" id="file" name="file" >
+        <br><br>
+        <!-- Submit button -->
+        <input type="submit" value="Upload">
+    </form>
+    <iframe name="upload_fame" width="900" height="70"></iframe> 
+    <br><br>
+    <form name="getMD5" id="getMD5" action="http://127.0.0.1:8000/md5" method="GET" target="get_result_frame">
+         <!-- Id input field -->
+         <label for="task_id">Put the id to get MD5 :</label>
+         <input name = "task_id" id="task_id" type="text" size="40">
+         <br><br>
+         <!-- Submit button -->
+         <input type="submit" value="Submit">
+    </form>
+    <iframe name="get_result_frame" width="1200" height="150"></iframe>
+</body>
+</html>
