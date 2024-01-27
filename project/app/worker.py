@@ -13,13 +13,11 @@ logdir=os.environ.get('LOGDIR', '/var/log/')
 
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger('worker_logger')
-if __name__ == "__main__":
-    iohandler = logging.FileHandler(f"{logdir}/worker--{hostname}--{str(datetime.datetime.now())}.log")
-    iohandler.setFormatter(formatter)
-    logger.addHandler(iohandler)
-    logger.setLevel(loglevel)
-    lock = multiprocessing.Lock()
-    # -----------------------
+iohandler = logging.FileHandler(f"{logdir}/worker--{hostname}--{str(datetime.datetime.now())}.log")
+iohandler.setFormatter(formatter)
+logger.addHandler(iohandler)
+logger.setLevel(loglevel)
+lock = multiprocessing.Lock()
 
 celery = Celery(__name__)
 celery.conf.broker_url = os.environ.get("CELERY_BROKER_URL", "amqp://localhost:5672")
